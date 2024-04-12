@@ -2,7 +2,24 @@ use ipgeolocate::{Locator, Service, GeoError};
 use tokio;
 use reqwest;
 use async_trait::async_trait;
+use serde::Deserialize;
 
+
+#[derive(Deserialize, Debug)]
+struct WeatherResponse {
+    current_weather: CurrentWeather,
+}
+
+#[derive(Deserialize, Debug)]
+struct CurrentWeather {
+    temperature: f64,
+    windspeed: f64,
+    weathercode: i32,
+}
+struct Location { 
+    longitude: String,
+    latitude: String
+}
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error>{
@@ -13,16 +30,28 @@ async fn main() -> Result<(), reqwest::Error>{
 
     let service = RealLocationService;
 
-    get_location(&service,&ip).await;
+    let location = get_location(&service,&ip).await.unwrap();
+    let weather_url = format!("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current_weather=true",
+                            location.longitude,
+                            location.latitude);
+
+    let response = reqwest::get(weather_url).await?.json::<WeatherResponse>().await?;
+    println!("Current temperature is {}°C", response.current_weather.temperature);
+    println!("Current windspeed is {} km/h", response.current_weather.windspeed);
+    println!("Weather code is {}", response.current_weather.weathercode);
 
     Ok(())
 }
 
-async fn get_location<S: LocationService>(service: &S, ip: &str)-> Result<(), GeoError>{
+async fn get_location<S: LocationService>(service: &S, ip: &str)-> Result<Location, GeoError>{
     match service.get_location(ip).await{
         Ok(response) => {
-            println!("{:?}", response.city);
-            Ok(())
+            let location = Location {
+                longitude: response.longitude,
+                latitude: response.latitude
+            };
+            println!("Consultando temperatura para {:?}", response.city);
+            Ok(location)
         }
         Err(error) => {
             println!("Error: {}", error);
