@@ -4,23 +4,6 @@ use reqwest;
 use async_trait::async_trait;
 use serde::Deserialize;
 
-
-#[derive(Deserialize, Debug)]
-struct WeatherResponse {
-    current_weather: CurrentWeather,
-}
-
-#[derive(Deserialize, Debug)]
-struct CurrentWeather {
-    temperature: f64,
-    windspeed: f64,
-    weathercode: i32,
-}
-struct Location { 
-    longitude: String,
-    latitude: String
-}
-
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error>{
     let ip = reqwest::get("https://api.ipify.org")
@@ -43,37 +26,6 @@ async fn main() -> Result<(), reqwest::Error>{
     Ok(())
 }
 
-async fn get_location<S: LocationService>(service: &S, ip: &str)-> Result<Location, GeoError>{
-    match service.get_location(ip).await{
-        Ok(response) => {
-            let location = Location {
-                longitude: response.longitude,
-                latitude: response.latitude
-            };
-            println!("Consultando temperatura para {:?}", response.city);
-            Ok(location)
-        }
-        Err(error) => {
-            println!("Error: {}", error);
-            Err(error)
-        }
-    }  
-}
-
-#[async_trait]
-pub trait LocationService {
-    async fn get_location(&self, ip: &str) -> Result<Locator, GeoError>;
-}
-
-struct RealLocationService;
-
-#[async_trait]
-impl LocationService for RealLocationService {
-    async fn get_location(&self, ip: &str) -> Result<Locator, GeoError>{
-        Locator::get(ip, Service::IpApi).await
-    }
-    
-}
 
 
 mod tests {
