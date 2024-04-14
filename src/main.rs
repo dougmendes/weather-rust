@@ -1,8 +1,13 @@
-use ipgeolocate::{Locator, Service, GeoError};
+mod application;
+mod infrastructure;
+mod domain;
+
+use ipgeolocate::{Locator, GeoError};
 use tokio;
 use reqwest;
-use async_trait::async_trait;
-use serde::Deserialize;
+
+use crate::application::service::{get_weather, get_location};
+use crate::infrastructure::location_service::{LocationService, RealLocationService};
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error>{
@@ -12,16 +17,13 @@ async fn main() -> Result<(), reqwest::Error>{
         .await?;
 
     let service = RealLocationService;
-
     let location = get_location(&service,&ip).await.unwrap();
-    let weather_url = format!("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current_weather=true",
-                            location.longitude,
-                            location.latitude);
 
-    let response = reqwest::get(weather_url).await?.json::<WeatherResponse>().await?;
-    println!("Current temperature is {}°C", response.current_weather.temperature);
-    println!("Current windspeed is {} km/h", response.current_weather.windspeed);
-    println!("Weather code is {}", response.current_weather.weathercode);
+    let response = get_weather(&location).await.unwrap();
+
+    println!("Current temperature is {}°C", response.current_weather.get_temperature());
+    println!("Current windspeed is {} km/h", response.current_weather.get_windspeed());
+    println!("Weather code is {}", response.current_weather.get_weathercode());
 
     Ok(())
 }
