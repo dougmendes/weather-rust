@@ -7,7 +7,7 @@ pub async fn get_location<S: LocationService>(service: &S, ip: &str)-> Result<Lo
     match service.get_location(ip).await{
         Ok(response) => {
             let location = Location::new(response.longitude, response.latitude);
-            println!("Consultando temperatura para {:?}", response.city);
+            println!("Consulting weather for{:?}", response.city);
             Ok(location)
         }
         Err(error) => {

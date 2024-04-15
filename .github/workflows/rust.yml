@@ -22,7 +22,7 @@ jobs:
       run: cargo test --verbose
 
   sonarcloud:
-    name: SonarCloud
+    name: Code Scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

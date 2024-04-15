@@ -1,0 +1,8 @@
+organization=dougmendes
+projectKey=dougmendes_weather-rust
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.53773
+branch=main
+dashboardUrl=https://sonarcloud.io/dashboard?id=dougmendes_weather-rust&branch=main
+ceTaskId=AY7b7xdGrnPPlYJpSsUC
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AY7b7xdGrnPPlYJpSsUC
