@@ -10,16 +10,17 @@ use crate::application::service::{get_weather, get_location};
 use crate::infrastructure::location_service::{LocationService, RealLocationService};
 
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error>{
+async fn main() -> Result<(), Box<dyn std::error::Error>>{
     let ip = reqwest::get("https://api.ipify.org")
         .await?
         .text()
         .await?;
 
     let service = RealLocationService;
-    let location = get_location(&service,&ip).await.unwrap();
 
-    let response = get_weather(&location).await.unwrap();
+    let location = get_location(&service,&ip).await?;
+
+    let response = get_weather(&location).await?;
 
     println!("Current temperature is {}°C", response.current_weather.get_temperature());
     println!("Current windspeed is {} km/h", response.current_weather.get_windspeed());
