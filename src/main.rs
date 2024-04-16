@@ -11,6 +11,7 @@ use crate::infrastructure::location_service::{LocationService, RealLocationServi
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>>{
+    println!("Searching for your weather...");
     let ip = reqwest::get("https://api.ipify.org")
         .await?
         .text()
